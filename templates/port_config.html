@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+
+{% block title %}Port Configurations{% endblock %}
+
+{% block section1content %}
+<div>
+  <div class="row" style="margin-left:3px;">
+    <h5>Switch and Port Selection</h5>
+    <form action="/" method="post" style="position:absolute;right:30px;display:none;" id="reset_endpointselection">
+      <input type="submit" id="reset" value="Reset">
+    </form>
+  </div>
+  <div class="row" style="margin-left:3px;">
+    <form action="{{ url_for('submit_port_switch') }}" method="post" id="switch_selection">
+      <label for="switch">Select a switch: </label>
+      <select name="switch" id="switch"></select>
+      <input type="submit" id="submit_switch" style="display:inline" onclick="loading_switch()">
+    </form>
+    <div class="loader loader--small" aria-label="Loading, please wait..." id="loading_switch" style="display:none">
+        <div class="wrapper">
+            <div class="wheel" style="width:20px;height:20px;"></div>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="row" style="margin-left:3px;">
+  <form action="{{ url_for('submit_port') }}" method="post" id="endpoint_selection" style="display:none">
+    <label for="endpoint">Select a port: </label>
+    <select name="endpoint" id="endpoint"></select>
+    <input type="submit" id="submit_endpoint" style="display:inline" onclick="loading_port()">
+  </form>
+  <div class="loader loader--small" aria-label="Loading, please wait..." id="loading_port" style="display:none">
+      <div class="wrapper">
+          <div class="wheel" style="width:20px;height:20px;"></div>
+      </div>
+  </div>
+</div>
+
+<div id="configurations_header" style="display:none;">
+  <br>
+  <div class="row" style="margin-left:3px;">
+      <div style="display:flex;">
+        <h5>Configurations</h5>
+        <form action="{{ url_for('copy_run_start') }}" method="post" style="position:relative;left:30px;">
+            <button class="btn btn--ghost btn--small" type="submit" id="submit_copyrunstart" onclick="copy_run_start()">
+                <span class="icon-computer"></span>
+                Copy Running to Startup Config
+            </button>
+        </form>
+        <div class="loader loader--small" aria-label="Loading, please wait..." id="copy_run_start" style="display:none;position:relative;left:30px;">
+          <div class="wrapper">
+              <div class="wheel" style="width:20px;height:20px;"></div>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div id="enable_port" style="display:none;">
+  <div class="alert alert--info" >
+    <div class="alert__icon icon-info-outline"></div>
+    <div class="alert__message">The port is currently disabled.</div>
+  </div>
+  <div class="row" style="margin-left:3px;">
+    <form action="{{ url_for('submit_enable_port')}}" method="post">
+      <input type="checkbox" id="enable_port_id" name="enable_port" checked style="display:none">
+      <button class="btn" onclick="enable_port()">Enable port</button>
+    </form>
+    <div class="loader loader--small" aria-label="Loading, please wait..." id="loading_enableport" style="display:none">
+      <div class="wrapper">
+          <div class="wheel"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="disable_port" style="display:none;">
+  <div class="alert alert--info" >
+    <div class="alert__icon icon-info-outline"></div>
+    <div class="alert__message">The port is currently enabled.</div>
+  </div>
+  <div class="row" style="margin-left:3px;">
+    <form action="{{ url_for('submit_enable_port')}}" method="post">
+      <input type="checkbox" id="disable_port_id" name="disable_port" checked style="display:none">
+      <button class="btn" onclick="disable_port()">Disable port</button>
+    </form>
+    <div class="loader loader--small" aria-label="Loading, please wait..." id="loading_disableport" style="display:none">
+      <div class="wrapper">
+          <div class="wheel"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="duplex_speed" style="display:none;">
+  <div class="alert alert--info" >
+    <div class="alert__icon icon-info-outline"></div>
+    <div class="alert__message">Configure the duplex and speed settings. Please note that the duplex and speed settings need to match on both sides of the link.</div>
+  </div>
+  <div class="row" style="margin-left:3px;">
+    <form action="{{ url_for('submit_duplex_speed') }}" method="post" id="duplex_speed_selection" style="display:none">
+      <label for="speed">Select a speed: </label>
+      <select name="speed" id="speed"></select>
+      <label for="duplex">Select a Duplex: </label>
+      <select name="duplex" id="duplex"></select>
+      <input type="submit" id="submit_duplex_speed" style="display:inline" onclick="loading_duplex_speed()">
+    </form>
+    <div class="loader loader--small" aria-label="Loading, please wait..." id="loading_wheel_duplex_speed" style="display:none">
+      <div class="wrapper">
+          <div class="wheel"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="add_vlan" style="display:none;">
+  <div class="alert alert--info" >
+    <div class="alert__icon icon-info-outline"></div>
+    <div class="alert__message">Add a VLAN.</div>
+  </div>
+  <div class="row" style="margin-left:3px;">
+    <form action="{{ url_for('add_vlan')}}" method="post"></formaction>
+      <label for="id">ID of VLAN:</label><br>
+      <input type="text" id="id" name="id"><br>
+      <label for="name">Name of VLAN:</label><br>
+      <input type="text" id="name" name="name"><br>
+      <input type="submit" id="submit_vlan" style="display:inline" onclick="loading_add_vlan()"">
+    </form>
+    <div class="loader loader--small" aria-label="Loading, please wait..." id="loading_wheel_add_vlan" style="display:none">
+      <br>
+      <div class="wrapper">
+          <div class="wheel"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="delete_vlan" style="display:none;">
+  <div class="alert alert--info" >
+    <div class="alert__icon icon-info-outline"></div>
+    <div class="alert__message">Delete a VLAN.</div>
+  </div>
+  <div class="row" style="margin-left:3px;">
+    <form action="{{ url_for('delete_vlan')}}" method="post"></formaction>
+      <label for="vlan">Select a VLAN: </label>
+      <select name="vlan" id="vlan"></select>
+      <input type="submit" id="submit_delete_vlan" style="display:inline" onclick="loading_delete_vlan()">
+    </form>
+    <div class="loader loader--small" aria-label="Loading, please wait..." id="loading_wheel_delete_vlan" style="display:none">
+      <br>
+      <div class="wrapper">
+          <div class="wheel"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block section3content %}
+<div id="attributes" style="display:none">
+<h5>Switch Information</h5>
+<table class="table table--lined table--compressed">
+  <tbody>
+    <tr>
+      <td>Switch SW Version</td>
+      <td>{{ endpoint_details['Switch SW Version'] }}</td>
+    </tr>
+    <tr>
+      <td>Hostname</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<br>
+
+<div id="port_information" style="display:none">
+  <h5>Port Information</h5>
+  <table class="table table--lined table--compressed">
+    <tbody>
+      <tr>
+        <td>Speed</td>
+        <td>{{ port_speed }}</td>
+      </tr>
+      <tr>
+        <td>Duplex</td>
+        <td>{{ port_duplex }}</td>
+      </tr>
+      <tr>
+        <td>Port Enabled</td>
+        <td>{{ port_enabled }}</td>
+      </tr>
+      {% for key in port_statistics %}
+      <tr>
+        <td>{{ key }}</td>
+        <td>{{ port_statistics[key] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <br>
+
+
+<div id="show_commands" style="display:none">
+<h5>show ip interfaces brief</h5>
+<table class="table table--lined table--compressed">
+  <tbody>
+    <tr>
+      <td><b>Interface</b></td>
+      <td><b>IP-address</b></td>
+      <td><b>Status</b></td>
+    </tr>
+    {% for interface in switch_ports_details %}
+    <tr>
+      <td>{{interface["name"]}}</td>
+      {% if interface["ietf-ip:ipv4"] %}
+        <td>{{interface["ietf-ip:ipv4"]["address"][0]["ip"]}}</td>
+      {% else %}
+       <td>Unassigned</td>
+      {% endif %}
+      <td>{{interface["enabled"]}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<br>
+
+<div id="vlan_details" style="display:none">
+  <h5>show vlan brief</h5>
+  <table class="table table--lined table--compressed">
+    <tbody>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Interfaces</th>
+      </tr>
+      {% for vlan in vlan_details %}
+      <tr>
+        <td>{{vlan["id"]}}</td>
+         <td>{{vlan["name"]}}</td>
+        <td></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+
+
+<script>
+  if ({{ alert }} === 1) {
+    alert('Something went wrong. Please try again.')
+  } else if ({{ alert }} === 2) {
+    alert('Successfully copied running to startup config.')
+  }
+
+  if ({{ logic }} === 1) {
+    var endpoint_form = document.getElementById("endpoint_selection");
+    endpoint_form.style.display = "inline";
+    var submit_switch = document.getElementById("submit_switch");
+    submit_switch.style.display = "none";
+    var reset_endpointselection = document.getElementById("reset_endpointselection");
+    reset_endpointselection.style.display = "inline";
+    var attributes = document.getElementById("attributes");
+    attributes.style.display = "inline";
+  } else if ({{ logic }} === 2) {
+    var endpoint_form = document.getElementById("endpoint_selection");
+    endpoint_form.style.display = "inline";
+    var submit_switch = document.getElementById("submit_switch");
+    submit_switch.style.display = "none";
+    var submit_endpoint = document.getElementById("submit_endpoint");
+    submit_endpoint.style.display = "none";
+    var reset_endpointselection = document.getElementById("reset_endpointselection");
+    reset_endpointselection.style.display = "inline";
+    var attributes = document.getElementById("attributes");
+    attributes.style.display = "inline";
+    var port_information = document.getElementById("port_information");
+    port_information.style.display = "inline";
+    var show_commands = document.getElementById("show_commands");
+    show_commands.style.display = "inline";
+    var vlan_details = document.getElementById("vlan_details");
+    vlan_details.style.display = "inline";
+    var panel_donotshow = document.getElementById("panel_donotshow");
+    panel_donotshow.style.display = "inline";
+    var configurations_header = document.getElementById("configurations_header");
+    configurations_header.style.display = "inline";
+    var add_vlan_button = document.getElementById("add_vlan")
+    add_vlan_button.style.display = "inline"
+    var delete_vlan = document.getElementById("delete_vlan");
+    delete_vlan.style.display = "inline";
+    var duplex_speed = document.getElementById("duplex_speed");
+    duplex_speed.style.display = "inline";
+    var duplex_speed_selection = document.getElementById("duplex_speed_selection");
+    duplex_speed_selection.style.display = "inline";
+    if ({{port_enabled}} === 1 ) {
+      var port = document.getElementById("disable_port");
+      port.style.display = "inline";
+    } else {
+      var port = document.getElementById("enable_port");
+      port.style.display = "inline";
+    }
+  }
+
+  function loading_switch() {
+    var wheel = document.getElementById("loading_switch");
+    wheel.style.display = "inline-block";
+    var submit_switch = document.getElementById("submit_switch");
+    submit_switch.style.display = "none";
+    var attributes = document.getElementById("attributes");
+    attributes.style.display = "inline";
+  }
+
+  function loading_port() {
+    var wheel = document.getElementById("loading_port");
+    wheel.style.display = "inline-block";
+    var submit_endpoint = document.getElementById("submit_endpoint");
+    submit_endpoint.style.display = "none";
+  }
+
+  function copy_run_start() {
+    var wheel = document.getElementById("copy_run_start");
+    wheel.style.display = "inline-block";
+  }
+
+  function enable_port() {
+    var button = document.getElementById("disable_port");
+    button.style.display = "inline-block";
+    var button = document.getElementById("enable_port")
+    button.style.display = "none"
+  }
+
+  function disable_port() {
+    var button = document.getElementById("enable_port");
+    button.style.display = "inline-block";
+    var button = document.getElementById("disable_port")
+    button.style.display = "none"
+  }
+
+  function loading_duplex_speed() {
+    var wheel = document.getElementById("loading_wheel_duplex_speed");
+    wheel.style.display = "inline-block";
+    var submit_duplex_speed = document.getElementById("submit_duplex_speed");
+    submit_duplex_speed.style.display = "none";
+  }
+
+  function loading_add_vlan() {
+    var wheel = document.getElementById("loading_wheel_add_vlan");
+    wheel.style.display = "inline-block";
+    var submit_vlan = document.getElementById("submit_vlan");
+    submit_vlan.style.display = "none";
+  }
+
+  function loading_delete_vlan() {
+    var wheel = document.getElementById("loading_wheel_delete_vlan");
+    wheel.style.display = "inline-block";
+    var submit_delete_vlan = document.getElementById("submit_delete_vlan");
+    submit_delete_vlan.style.display = "none";
+  }
+
+  var switch_choices = {{ switches | safe }};
+  console.log(switch_choices);
+  var switch_choices_length = switch_choices.length;
+  for (var i = 0; i < switch_choices_length; i++) {
+    var option = document.createElement('OPTION');
+    var option_text = document.createTextNode(switch_choices[i]);
+    console.log(option_text);
+    option.appendChild(option_text);
+    document.getElementById("switch").appendChild(option);
+  }
+
+  var endpoint_choices = {{ endpoints | safe }};
+  console.log(endpoint_choices);
+  var endpoint_choices_length = endpoint_choices.length;
+  for (var i = 0; i < endpoint_choices_length; i++) {
+    var option = document.createElement('OPTION');
+    var option_text = document.createTextNode(endpoint_choices[i]);
+    console.log(option_text);
+    option.appendChild(option_text);
+    document.getElementById("endpoint").appendChild(option);
+  }
+
+  var duplex_choices = {{ duplex_options | safe }};
+  console.log(duplex_choices);
+  var duplex_choices_length = duplex_choices.length;
+  for (var i = 0; i < duplex_choices_length; i++) {
+    var option = document.createElement('OPTION');
+    var option_text = document.createTextNode(duplex_choices[i]);
+    console.log(option_text);
+    option.appendChild(option_text);
+    document.getElementById("duplex").appendChild(option);
+  }
+
+  var speed_choices = {{ speed_options | safe }};
+  console.log(speed_choices);
+  var speed_choices_length = speed_choices.length;
+  for (var i = 0; i < speed_choices_length; i++) {
+    var option = document.createElement('OPTION');
+    var option_text = document.createTextNode(speed_choices[i]);
+    console.log(option_text);
+    option.appendChild(option_text);
+    document.getElementById("speed").appendChild(option);
+  }
+
+  var vlan_choices = {{ vlan_details | safe }};
+  console.log(vlan_choices);
+  var vlan_choices_length = vlan_choices.length;
+  for (var i = 0; i < vlan_choices_length; i++) {
+    var option = document.createElement('OPTION');
+    var option_text = document.createTextNode(vlan_choices[i]['id']);
+    console.log(option_text);
+    option.appendChild(option_text);
+    document.getElementById("vlan").appendChild(option);
+  }
+
+</script>
+
+{% endblock %}
+
+{% block js %}
+
+{% endblock %}
