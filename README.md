@@ -2,7 +2,7 @@
 A simple interface to configure ports on switches. With this interface, we can enable and disable interfaces, add and delete VLANs and change speed and duplex settings per interface. We make the configurations using RESTCONF. Altogether, it allows remote teams to make simple configurations to the network.
 
 ## Workflow
-Add workflow
+![Workflow](IMAGES/workflow.png)
 
 ## Interface
 ![Screenshot_1](IMAGES/port_config_1.png)
@@ -24,7 +24,9 @@ Add workflow
 
 ## Installation
 
-1. Unzip this directory.
+1. Clone the repository
+
+        $ git clone (link)
 
 2. Open the `credentials.yml` file and add the following information:
     
